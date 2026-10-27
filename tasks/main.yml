@@ -1,12 +1,18 @@
 ---
-- name: Install prerequisite packages
-  apt:
-    name: [apt-transport-https, ca-certificates, curl, gnupg, python3-debian]
+- name: Install prerequisite packages (Debian)
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - python3-debian
     state: present
     update_cache: true
+  when: ansible_os_family == "Debian"
 
-- name: Add Vector repository (Datadog)
-  deb822_repository:
+- name: Add Vector repository (Debian)
+  ansible.builtin.deb822_repository:
     name: vector
     types: deb
     uris: https://apt.vector.dev
@@ -14,15 +20,25 @@
     components: vector-0
     signed_by: https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public
     state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add Vector repository (RedHat)
+  ansible.builtin.yum_repository:
+    name: vector
+    description: Vector Repo
+    baseurl: https://yum.vector.dev/stable/vector-0/$basearch/
+    gpgkey: https://keys.datadoghq.com/DATADOG_RPM_KEY_CURRENT.public
+    gpgcheck: true
+  when: ansible_os_family == "RedHat"
 
 - name: Install Vector packages
-  apt:
+  ansible.builtin.package:
     name: vector
     state: present
     update_cache: true
 
 - name: Ensure Vector data directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ vector_data_dir }}"
     state: directory
     owner: vector
@@ -30,7 +46,7 @@
     mode: '0755'
 
 - name: Create Vector configuration
-  template:
+  ansible.builtin.template:
     src: vector.yaml.j2
     dest: /etc/vector/vector.yaml
     owner: root
@@ -39,7 +55,7 @@
   notify: Restart Vector
 
 - name: Ensure Vector service is running
-  service:
+  ansible.builtin.systemd:
     name: vector
     state: started
     enabled: true

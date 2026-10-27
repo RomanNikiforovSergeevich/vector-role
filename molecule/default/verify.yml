@@ -1,0 +1,27 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert that Vector service is running
+      ansible.builtin.assert:
+        that:
+          - "'vector.service' in ansible_facts.services"
+          - "ansible_facts.services['vector.service'].state == 'running'"
+        fail_msg: "Vector service is not running"
+        success_msg: "Vector service is running"
+
+    - name: Check Vector config file exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.yaml
+      register: config_file
+
+    - name: Assert config file is valid
+      ansible.builtin.assert:
+        that:
+          - config_file.stat.exists
+          - config_file.stat.size > 0
+        fail_msg: "Vector config is missing or empty"

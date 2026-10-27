@@ -1,0 +1,32 @@
+---
+role_name_check: 1
+driver:
+  name: docker
+
+platforms:
+  - name: ubuntu-instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    pre_build_image: true
+    privileged: true
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+
+  - name: oracle-instance
+    image: mpaivabarbosa/molecule-systemd-oraclelinux:9
+    pre_build_image: true
+    privileged: true
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      allow_broken_conditionals: true
+
+verifier:
+  name: ansible
