@@ -1,0 +1,21 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Disable tmpfiles-clean and install prerequisites (Debian)
+      raw: |
+        # Останавливаем и отключаем службу очистки /tmp
+        systemctl stop systemd-tmpfiles-clean.timer || true
+        systemctl disable systemd-tmpfiles-clean.timer || true
+        systemctl stop systemd-tmpfiles-clean.service || true
+        
+        # Запрещаем очищать файлы в /tmp
+        echo "x /tmp/*" > /etc/tmpfiles.d/tmp.conf
+        
+        # Устанавливаем нужные пакеты для ClickHouse
+        if [ -f /etc/debian_version ]; then
+          apt-get update
+          apt-get install -y dirmngr gnupg apt-transport-https ca-certificates python3-apt
+        fi

@@ -1,0 +1,26 @@
+---
+- name: Verify ClickHouse
+  hosts: clickhouse
+  tasks:
+    - name: Check ClickHouse port 9000
+      ansible.builtin.wait_for:
+        port: 9000
+        state: started
+
+- name: Verify Vector
+  hosts: vector
+  become: true
+  tasks:
+    - name: Check Vector service
+      ansible.builtin.service:
+        name: vector
+        state: started
+      check_mode: true
+
+- name: Verify Lighthouse
+  hosts: lighthouse
+  tasks:
+    - name: Check Lighthouse web page
+      ansible.builtin.uri:
+        url: "http://localhost"
+        status_code: 200

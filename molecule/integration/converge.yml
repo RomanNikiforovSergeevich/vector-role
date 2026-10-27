@@ -1,0 +1,15 @@
+---
+- name: Converge ClickHouse
+  hosts: clickhouse
+  roles:
+    - clickhouse
+
+- name: Converge Vector
+  hosts: vector
+  roles:
+    - vector-role
+
+- name: Converge Lighthouse
+  hosts: lighthouse
+  roles:
+    - lighthouse-role
