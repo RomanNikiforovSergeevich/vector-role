@@ -13,6 +13,8 @@ molecule/*/ephemeral/
 # Tox
 .tox/
 
+.podman/
+
 # Ansible
 *.retry
 .ansible/

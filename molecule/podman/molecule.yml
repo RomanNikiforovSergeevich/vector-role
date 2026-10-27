@@ -1,0 +1,32 @@
+---
+role_name_check: 1
+driver:
+  name: podman
+
+platforms:
+  - name: ubuntu-podman
+    image: ubuntu:22.04
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      allow_broken_conditionals: true
+
+verifier:
+  name: ansible
+
+scenario:
+  name: podman
+  test_sequence:
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

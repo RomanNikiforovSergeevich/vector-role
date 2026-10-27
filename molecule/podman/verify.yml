@@ -1,0 +1,9 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check if Vector service is running
+      ansible.builtin.command: systemctl is-active vector
+      register: vector_status
+      changed_when: false
+      failed_when: vector_status.stdout != "active"

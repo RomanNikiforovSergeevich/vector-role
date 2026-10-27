@@ -1,0 +1,40 @@
+---
+- name: Create
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Start Podman container(s)
+      containers.podman.podman_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: started
+        command: /sbin/init   # <-- Запускаем systemd
+        tty: true
+        privileged: true
+        volumes:
+          - /sys/fs/cgroup:/sys/fs/cgroup:rw
+        cgroupns: host
+      loop:
+        - { name: "ubuntu-podman", image: "geerlingguy/docker-ubuntu2204-ansible:latest" }
+
+    - name: Write inventory file directly
+      ansible.builtin.copy:
+        dest: "{{ molecule_ephemeral_directory }}/inventory/molecule_inventory.yml"
+        content: |
+          all:
+            children:
+              molecule:
+                hosts:
+                  ubuntu-podman:
+                    ansible_connection: containers.podman.podman
+                    ansible_python_interpreter: /usr/bin/python3
+        mode: '0600'
+
+    - name: Force inventory refresh
+      ansible.builtin.meta: refresh_inventory
+
+    - name: Fail if molecule group is missing
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: "molecule group was not found inside inventory groups: {{ groups }}"
+      run_once: true
